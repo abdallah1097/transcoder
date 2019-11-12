@@ -1,0 +1,19 @@
+# Changes should be applied to Dockerfile.template too
+
+FROM python:3
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends ffmpeg cifs-utils
+ENV PYTHONUNBUFFERED 1
+
+# copying requirements separately means they are only installed when the file changes
+COPY requirements.txt /code/app/requirements.txt
+WORKDIR /code/app
+RUN pip install -Ur requirements.txt
+
+RUN mkdir /mount/ /mount/master/ /mount/access /mount/watch /mount/output
+
+COPY . /code/
+
+ENTRYPOINT ["/code/docker-entrypoint.sh"]
+CMD [ "python3", "./easyaccess.py" ]

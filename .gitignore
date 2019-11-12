@@ -1,0 +1,14 @@
+venv
+localsettings.py
+*.pyc
+.DS_Store
+logs
+.idea
+.vscode/
+
+.coverage
+celerybeat-schedule
+data/
+dev.env
+log/
+media/

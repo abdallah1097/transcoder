@@ -1,0 +1,5 @@
+slackclient
+requests
+python-dateutil
+pytz
+ipdb

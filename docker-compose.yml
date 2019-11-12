@@ -1,0 +1,7 @@
+version: '2'
+services:
+  transcoder:
+    build: .
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH

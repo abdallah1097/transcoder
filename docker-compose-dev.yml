@@ -1,0 +1,10 @@
+version: '2'
+services:
+  transcoder:
+    env_file: dev.env
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
