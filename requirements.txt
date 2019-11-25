@@ -1,5 +1,6 @@
-slackclient
-requests
+boto3
+ipdb
 python-dateutil
 pytz
-ipdb
+requests
+slackclient

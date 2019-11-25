@@ -23,6 +23,7 @@ from lib.fixity import fixity_move, post_move_filename
 from lib.ffmpeg import (find_video_files, convert_and_fixity_move,
                         FFMPEGError, is_url, write_video_metadata,
                         write_metadata_summary_entry)
+from lib.s3 import upload_to_s3
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
@@ -141,9 +142,19 @@ def main():
     except (ValueError, IOError) as e:
         logging.warning("%s Leaving alone." % e)
         post_slack_message("Skipped moving source file :weary:: %s" % e)
+        return
+
+
+    # UPLOAD THE ORIGIN FILE TO S3
+    try:
+        upload_to_s3(final_master_file)
+    except (Exception) as e:
+        logging.warning("%s Couldn't upload to S3" % e)
+        post_slack_message("Couldn't upload to S3 :disappointed:: %s" % e)
+        return
+
 
     logging.info("=" * 80)
-
 
 if __name__ == "__main__":
     main()
