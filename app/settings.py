@@ -1,8 +1,10 @@
+import os
+
 # These paths are mounted into the docker container by docker-entrypoint.sh
-WATCH_FOLDER = "/mount/watch"
-MASTER_FOLDER = "/mount/master"
-ACCESS_FOLDER = "/mount/access"
-OUTPUT_FOLDER = "/mount/output"
+WATCH_FOLDER = os.getenv("WATCH_FOLDER", "/mount/watch")
+MASTER_FOLDER = os.getenv("MASTER_FOLDER", "/mount/master")
+ACCESS_FOLDER = os.getenv("ACCESS_FOLDER", "/mount/access")
+OUTPUT_FOLDER = os.getenv("OUTPUT_FOLDER", "/mount/output")
 
 FFMPEG_DESTINATION_EXT = ".mp4"
 FFMPEG_ARGS = [

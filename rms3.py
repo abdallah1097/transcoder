@@ -11,8 +11,8 @@ file_to_be_deleted = sys.argv[1]
 print("Deleting "+file_to_be_deleted+"...")
 client = boto3.client(
     's3',
-    aws_access_key_id=os.environ['ACCESS_KEY'],
-    aws_secret_access_key=os.environ['SECRET_KEY'],
+    aws_access_key_id=os.environ['S3_ACCESS_KEY'],
+    aws_secret_access_key=os.environ['S3_SECRET_KEY'],
 )
 response = client.delete_object(Bucket='xos-transcoding-media', Key=file_to_be_deleted)
 response = client.list_objects(Bucket='xos-transcoding-media')

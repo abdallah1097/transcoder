@@ -3,8 +3,8 @@ import logging
 
 import boto3
 
-ACCESS_KEY = os.environ['ACCESS_KEY']
-SECRET_KEY = os.environ['SECRET_KEY']
+S3_ACCESS_KEY = os.environ['S3_ACCESS_KEY']
+S3_SECRET_KEY = os.environ['S3_SECRET_KEY']
 
 BUCKET = 'xos-transcoding-media'
 
@@ -14,8 +14,8 @@ def upload_to_s3(path):
     """
     client = boto3.client(
         's3',
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY
+        aws_access_key_id=S3_ACCESS_KEY,
+        aws_secret_access_key=S3_SECRET_KEY
     )
 
     # TODO: turn off crazy verbose boto3 logs

@@ -12,3 +12,5 @@ data/
 dev.env
 log/
 media/
+
+*.swp

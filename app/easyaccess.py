@@ -12,18 +12,21 @@ For every compatible video file in the watch folder (assume it is a master file)
 """
 
 import os
+import json
 import logging
 import posixpath
 import time
+from datetime import date
 from lib.formatting import seconds_to_hms
 from lib.slack import post_slack_message
 import settings
 from lib.collection_files import get_or_create_collection_folder, master_to_access_filename, file_path_to_url, parse_collection_file_path
-from lib.fixity import fixity_move, post_move_filename
-from lib.ffmpeg import (find_video_files, convert_and_fixity_move,
+from lib.fixity import generate_file_md5, fixity_move, post_move_filename
+from lib.ffmpeg import (get_video_metadata, find_video_files, convert_and_fixity_move,
                         FFMPEGError, is_url, write_video_metadata,
                         write_metadata_summary_entry)
 from lib.s3 import upload_to_s3
+from lib.xos import update_xos_with_stub_video
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
@@ -60,6 +63,14 @@ def new_file_slack_message(message, url, metadata):
     post_slack_message(formatted_message, attachments=attachments)
 
 
+def json_datetime_fix(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, date):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+
 def main():
     logging.info("Looking for video files to convert in %s. Press Ctrl+C (several times) to quit." % settings.WATCH_FOLDER)
 
@@ -79,6 +90,14 @@ def main():
         return
 
     master_filename = os.path.basename(working_master_file)
+
+    # UPDATE XOS WITH STUB VIDEO
+    generate_file_md5(working_master_file, store=True)
+    original_file_metadata = get_video_metadata(working_master_file)
+    response = update_xos_with_stub_video({
+        'title': master_filename,
+        'original_file_metadata': json.dumps(original_file_metadata, default=json_datetime_fix)
+    })
 
     logging.info("=" * 80)
     logging.info("Processing %s:" % master_filename)
@@ -113,10 +132,10 @@ def main():
             'title': title
         })
         write_metadata_summary_entry(access_file_metadata, settings.OUTPUT_FOLDER)
-        new_file_slack_message("*New access file* :hatching_chick:", final_access_file, access_file_metadata)
+        #new_file_slack_message("*New access file* :hatching_chick:", final_access_file, access_file_metadata)
     except (IOError, FFMPEGError) as e:
         logging.warning("%s Leaving file alone." % e)
-        post_slack_message("Skipped access file :disappointed:: %s Leaving source file alone." % e)
+        #post_slack_message("Skipped access file :disappointed:: %s Leaving source file alone." % e)
         return # skip doing anything with the master file.
 
 
@@ -138,10 +157,10 @@ def main():
             'title': title
         })
         write_metadata_summary_entry(master_file_metadata, settings.OUTPUT_FOLDER)
-        new_file_slack_message("*New master file* :movie_camera:", final_master_file, master_file_metadata)
+        #new_file_slack_message("*New master file* :movie_camera:", final_master_file, master_file_metadata)
     except (ValueError, IOError) as e:
         logging.warning("%s Leaving alone." % e)
-        post_slack_message("Skipped moving source file :weary:: %s" % e)
+        #post_slack_message("Skipped moving source file :weary:: %s" % e)
         return
 
 
@@ -150,8 +169,9 @@ def main():
         upload_to_s3(final_master_file)
     except (Exception) as e:
         logging.warning("%s Couldn't upload to S3" % e)
-        post_slack_message("Couldn't upload to S3 :disappointed:: %s" % e)
+        #post_slack_message("Couldn't upload to S3 :disappointed:: %s" % e)
         return
+
 
 
     logging.info("=" * 80)
