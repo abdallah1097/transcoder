@@ -18,8 +18,6 @@ def upload_to_s3(path):
         aws_secret_access_key=S3_SECRET_KEY
     )
 
-    # TODO: turn off crazy verbose boto3 logs
-
     basename = os.path.basename(path)
     logging.info("Uploading to S3: %s", basename)
     client.upload_file(path, S3_BUCKET, S3_LOCATION+'/'+basename)
