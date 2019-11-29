@@ -26,9 +26,9 @@ from lib.ffmpeg import (get_video_metadata, find_video_files, convert_and_fixity
                         FFMPEGError, is_url, write_video_metadata,
                         write_metadata_summary_entry)
 from lib.s3 import upload_to_s3
-from lib.xos import update_xos_with_stub_video
+from lib.xos import update_xos_with_stub_video, update_xos_with_final_video
 
-logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
 
 def new_file_slack_message(message, url, metadata):
@@ -94,7 +94,7 @@ def main():
     # UPDATE XOS WITH STUB VIDEO
     generate_file_md5(working_master_file, store=True)
     original_file_metadata = get_video_metadata(working_master_file)
-    response = update_xos_with_stub_video({
+    asset_id = update_xos_with_stub_video({
         'title': master_filename,
         'original_file_metadata': json.dumps(original_file_metadata, default=json_datetime_fix)
     })
@@ -138,7 +138,6 @@ def main():
         #post_slack_message("Skipped access file :disappointed:: %s Leaving source file alone." % e)
         return # skip doing anything with the master file.
 
-
     # MOVE THE ORIGIN FILE INTO THE MASTER FOLDER
     try:
         # fixity move the master file, leaving a spare copy in DONE_FOLDER for the time being because we're paranoid.
@@ -163,7 +162,6 @@ def main():
         #post_slack_message("Skipped moving source file :weary:: %s" % e)
         return
 
-
     # UPLOAD THE ORIGIN FILE TO S3
     try:
         upload_to_s3(final_master_file)
@@ -172,7 +170,18 @@ def main():
         #post_slack_message("Couldn't upload to S3 :disappointed:: %s" % e)
         return
 
-
+    # UPDATE XOS WITH FINAL VIDEO
+    try:
+        generate_file_md5(final_master_file, store=True)
+        final_file_metadata = get_video_metadata(final_master_file)
+        update_xos_with_final_video(asset_id, {
+            'resource': os.path.basename(final_master_file),
+            'transcoded_file_metadata': json.dumps(final_file_metadata, default=json_datetime_fix)
+        })
+    except (Exception) as e:
+        logging.warning("%s Couldn't update XOS with final video" % e)
+        #post_slack_message("Couldn't update XOS with final video :disappointed:: %s" % e)
+        return
 
     logging.info("=" * 80)
 
