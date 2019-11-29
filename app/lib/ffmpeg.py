@@ -1,20 +1,20 @@
+import csv
+import json
+import logging
+import os
+import subprocess
+import tempfile
+from datetime import datetime
 from pathlib import Path
-
+from shutil import which
 from urllib.parse import urlparse
 
-import settings
-import tempfile
-import logging
-from lib.fixity import fixity_move
-import json
-import subprocess
-import os
-from datetime import datetime
-from pytz import timezone
 import requests
 from dateutil.parser import parse as parse_date
-from shutil import which
-import csv
+from pytz import timezone
+
+import settings
+from lib.fixity import fixity_move
 from lib.formatting import seconds_to_hms
 
 try:

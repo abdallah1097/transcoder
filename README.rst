@@ -13,6 +13,13 @@ The Transcoder is shipped as a Docker image. It needs to be run with special per
    cp dev.tmpl.env dev.env # now edit the values in dev.env
    docker-compose -f docker-compose-dev.yml up --build
 
+To run without Docker::
+
+   virtualenv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   env `cat dev.env | xargs` app/easyaccess.py
+
 To install and deploy on Balena
 -------------------------------
 

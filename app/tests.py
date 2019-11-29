@@ -1,4 +1,5 @@
 import unittest
+
 from lib.formatting import seconds_to_hms
 
 

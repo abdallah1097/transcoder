@@ -11,22 +11,26 @@ For every compatible video file in the watch folder (assume it is a master file)
     - [x] slack a record of what happened.
 """
 
-import os
 import json
 import logging
+import os
 import posixpath
 import time
 from datetime import date
-from lib.formatting import seconds_to_hms
-from lib.slack import post_slack_message
+
 import settings
-from lib.collection_files import get_or_create_collection_folder, master_to_access_filename, file_path_to_url, parse_collection_file_path
-from lib.fixity import generate_file_md5, fixity_move, post_move_filename
-from lib.ffmpeg import (get_video_metadata, find_video_files, convert_and_fixity_move,
-                        FFMPEGError, is_url, write_video_metadata,
-                        write_metadata_summary_entry)
+from lib.collection_files import (file_path_to_url,
+                                  get_or_create_collection_folder,
+                                  master_to_access_filename,
+                                  parse_collection_file_path)
+from lib.ffmpeg import (FFMPEGError, convert_and_fixity_move, find_video_files,
+                        get_video_metadata, is_url,
+                        write_metadata_summary_entry, write_video_metadata)
+from lib.fixity import fixity_move, generate_file_md5, post_move_filename
+from lib.formatting import seconds_to_hms
 from lib.s3 import upload_to_s3
-from lib.xos import update_xos_with_stub_video, update_xos_with_final_video
+from lib.slack import post_slack_message
+from lib.xos import update_xos_with_final_video, update_xos_with_stub_video
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 

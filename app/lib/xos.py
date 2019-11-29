@@ -1,4 +1,5 @@
 import os
+
 import requests
 
 XOS_AUTH_TOKEN = os.environ['XOS_AUTH_TOKEN']

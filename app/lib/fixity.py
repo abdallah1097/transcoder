@@ -1,8 +1,9 @@
 import hashlib
+import logging
 import os
 import shutil
-import logging
 import time
+
 import settings
 
 
