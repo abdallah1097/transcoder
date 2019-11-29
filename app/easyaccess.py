@@ -95,7 +95,7 @@ def main():
     generate_file_md5(working_master_file, store=True)
     original_file_metadata = get_video_metadata(working_master_file)
     asset_id = update_xos_with_stub_video({
-        'title': master_filename,
+        'title': master_filename+" NOT UPLOADED",
         'original_file_metadata': json.dumps(original_file_metadata, default=json_datetime_fix)
     })
 
@@ -175,6 +175,7 @@ def main():
         generate_file_md5(final_master_file, store=True)
         final_file_metadata = get_video_metadata(final_master_file)
         update_xos_with_final_video(asset_id, {
+            'title': master_filename,
             'resource': os.path.basename(final_master_file),
             'transcoded_file_metadata': json.dumps(final_file_metadata, default=json_datetime_fix)
         })
