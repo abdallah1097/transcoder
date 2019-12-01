@@ -136,10 +136,10 @@ def main():
             'title': title
         })
         write_metadata_summary_entry(access_file_metadata, settings.OUTPUT_FOLDER)
-        #new_file_slack_message("*New access file* :hatching_chick:", final_access_file, access_file_metadata)
+        new_file_slack_message("*New access file* :hatching_chick:", final_access_file, access_file_metadata)
     except (IOError, FFMPEGError) as e:
         logging.warning("%s Leaving file alone." % e)
-        #post_slack_message("Skipped access file :disappointed:: %s Leaving source file alone." % e)
+        post_slack_message("Skipped access file :disappointed:: %s Leaving source file alone." % e)
         return # skip doing anything with the master file.
 
     # MOVE THE ORIGIN FILE INTO THE MASTER FOLDER
@@ -160,10 +160,10 @@ def main():
             'title': title
         })
         write_metadata_summary_entry(master_file_metadata, settings.OUTPUT_FOLDER)
-        #new_file_slack_message("*New master file* :movie_camera:", final_master_file, master_file_metadata)
+        new_file_slack_message("*New master file* :movie_camera:", final_master_file, master_file_metadata)
     except (ValueError, IOError) as e:
         logging.warning("%s Leaving alone." % e)
-        #post_slack_message("Skipped moving source file :weary:: %s" % e)
+        post_slack_message("Skipped moving source file :weary:: %s" % e)
         return
 
     # UPLOAD THE ORIGIN FILE TO S3
@@ -171,7 +171,7 @@ def main():
         upload_to_s3(final_master_file)
     except (Exception) as e:
         logging.warning("%s Couldn't upload to S3" % e)
-        #post_slack_message("Couldn't upload to S3 :disappointed:: %s" % e)
+        post_slack_message("Couldn't upload to S3 :disappointed:: %s" % e)
         return
 
     # UPDATE XOS WITH FINAL VIDEO
@@ -185,7 +185,7 @@ def main():
         })
     except (Exception) as e:
         logging.warning("%s Couldn't update XOS with final video" % e)
-        #post_slack_message("Couldn't update XOS with final video :disappointed:: %s" % e)
+        post_slack_message("Couldn't update XOS with final video :disappointed:: %s" % e)
         return
 
     logging.info("=" * 80)
