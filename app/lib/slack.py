@@ -1,9 +1,6 @@
-import os
-
 import slack
-
 import settings
-
+import os
 
 def post_slack_message(message, channel=None, **kwargs):
     if channel is None:
