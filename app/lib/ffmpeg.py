@@ -17,20 +17,7 @@ from shutil import which
 import csv
 from lib.formatting import seconds_to_hms
 
-try:
-    ffmpeg_location = getattr(settings, "FFMPEG_LOCATION", which("ffmpeg"))
-    ffprobe_location = getattr(settings, "FFPROBE_LOCATION", which("ffprobe"))
-    assert ffmpeg_location
-    assert ffprobe_location
-
-except AssertionError:
-    raise EnvironmentError(
-        """`ffmpeg` and `ffprobe` must be installed and available before the ffmpeg module can be imported.
-        You can specify their locations using FFMPEG_LOCATION and FFPROBE_LOCATION in settings."""
-    )
-
 timezone = timezone(settings.TIMEZONE)
-
 
 VIDEO_MIME_TYPES = {
     '.flv': 'video/x-flv',
@@ -74,29 +61,11 @@ class FFMPEGError(subprocess.CalledProcessError):
         return "Command '%s' didn't complete successfully (exit status %d). Perhaps not a valid video file?" % (" ".join(self.cmd), self.returncode)
 
 
-def is_url(url):
-    return urlparse(url).scheme != ""
-
-
 def get_file_metadata(file_location):
-    if is_url(file_location):
-        headers = requests.head(file_location, allow_redirects=True).headers
-    else:
-        headers = None
-
-    if headers:
-        modified_datetime = parse_date(headers['Last-Modified'])
-        creation_datetime = modified_datetime # can't get this info over HTTP
-        file_size = int(headers['content-length'])
-    else:
-        creation_datetime = datetime.fromtimestamp(os.path.getctime(file_location))
-        modified_datetime = datetime.fromtimestamp(os.path.getmtime(file_location))
-        file_size = os.path.getsize(file_location)
-
     return {
-        'creation_datetime': timezone.localize(creation_datetime),
-        'modified_datetime': timezone.localize(modified_datetime),
-        'file_size_bytes': file_size,
+        'creation_datetime': timezone.localize(datetime.fromtimestamp(os.path.getctime(file_location))),
+        'modified_datetime': timezone.localize(datetime.fromtimestamp(os.path.getmtime(file_location))),
+        'file_size_bytes': os.path.getsize(file_location),
     }
 
 
@@ -109,7 +78,7 @@ def get_video_metadata(video_location):
     """
 
 
-    ffprobe_args = [ffprobe_location, "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", video_location]
+    ffprobe_args = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", video_location]
     try:
         command = " ".join(ffprobe_args)
         logging.info("Running %s" % command)
@@ -177,18 +146,6 @@ def get_video_metadata(video_location):
         'checksum': checksum,
     }
 
-def write_video_metadata(video_location):
-    """
-    Call 'get_video_metadata' and write the results to an adjacent .json file'.
-    :param video_location:
-    :return:
-    """
-    metadata = get_video_metadata(video_location)
-    json_path = "%s.json" % video_location
-    with open(json_path, 'w') as outfile:
-        json.dump(metadata, outfile, indent=2, default=str)
-    return metadata
-
 
 # Mini lib for network-concurrency-friendly locking/unlocking a file by writing adjacent '.lock' files.
 
@@ -221,51 +178,6 @@ def find_video_files(source_folder, lock_files=True):
                         unlock(filepath)
                 else:
                     yield filepath
-
-
-def convert(source_path, destination_path, args=[]):
-    ffmpeg_args = [
-        ffmpeg_location,
-        '-i', source_path] + \
-        args + [
-        destination_path
-    ]
-    logging.info("Running %s" % " ".join(ffmpeg_args))
-    try:
-        r = subprocess.run(ffmpeg_args, check=True)
-    except subprocess.CalledProcessError as e:
-        raise FFMPEGError(e.returncode, ffmpeg_args) from e
-
-    # delete an output file if it is zero bytes
-    if os.path.exists(destination_path) and os.path.getsize(destination_path) == 0:
-        os.remove(destination_path)
-
-    logging.info("Conversion complete.")
-
-
-def convert_and_fixity_move(source_path, destination_path, args=[]):
-    """
-    Convert a file to a temp folder. On success, fixity move the result into its final folder.
-    """
-    if os.path.exists(destination_path):
-        raise IOError("Cannot convert video: Destination %s already exists." % destination_path)
-
-    # make a tmp folder to store the convert output (in case the output file has the same name as the input file)
-    with tempfile.TemporaryDirectory() as tmp_folder:
-        tmp_path = os.path.join(tmp_folder, os.path.basename(destination_path))
-        convert(
-            source_path,
-            tmp_path,
-            args,
-        )
-
-        # fixity move the result
-        fixity_move(
-            tmp_path, destination_path,
-            failsafe_folder=None
-        )
-
-    # tmp folder is deleted at this point
 
 
 def write_metadata_summary(metadata_summary, folder):

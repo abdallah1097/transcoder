@@ -1,10 +1,11 @@
 import os
 
 # These paths are mounted into the docker container by docker-entrypoint.sh
-WATCH_FOLDER = os.getenv("WATCH_FOLDER", "/mount/watch")
-MASTER_FOLDER = os.getenv("MASTER_FOLDER", "/mount/master")
-ACCESS_FOLDER = os.getenv("ACCESS_FOLDER", "/mount/access")
-OUTPUT_FOLDER = os.getenv("OUTPUT_FOLDER", "/mount/output")
+WATCH_FOLDER = os.getenv("WATCH_FOLDER", "/mount/watch/")
+MASTER_FOLDER = os.getenv("MASTER_FOLDER", "/mount/master/")
+ACCESS_FOLDER = os.getenv("ACCESS_FOLDER", "/mount/access/")
+WEB_FOLDER = os.getenv("WEB_FOLDER", "/mount/web/")
+OUTPUT_FOLDER = os.getenv("OUTPUT_FOLDER", "/mount/output/")
 
 FFMPEG_DESTINATION_EXT = ".mp4"
 FFMPEG_ARGS = [
@@ -13,7 +14,7 @@ FFMPEG_ARGS = [
     '-hide_banner',
     '-pix_fmt', 'yuv420p',  # colour format compatible with quicktime
     '-c:v', 'libx264',
-    '-preset', 'medium',
+    '-preset', 'ultrafast',
     # quality of conversion. Try veryslow if lots of time, or ultrafast for testing. Default is 'medium'.
     '-crf', '23',  # compression (implies bitrate): 23 is default, 18 is visually lossless
     '-c:a', 'aac',  # convert audio to aac
@@ -26,5 +27,6 @@ TIMEZONE = 'Australia/Victoria'
 MOVE_RETRIES = 5
 RETRY_WAIT = 300  # five minutes
 
-MASTER_URL = "smb://fsqcollnas.corp.acmi.net.au/Preservation%20Masters/"
-ACCESS_URL = "smb://fsqcollnas.corp.acmi.net.au/Access%20Copies/"
+MASTER_URL = "smb:" + os.getenv('SMB_MASTER', "//fsqcollnas.corp.acmi.net.au/Preservation%20Masters/")
+ACCESS_URL = "smb:" + os.getenv('SMB_ACCESS', "//fsqcollnas.corp.acmi.net.au/Access%20Copies/")
+WEB_URL = "smb:" + os.getenv('SMB_WEB', "//fsqcollnas.corp.acmi.net.au/Web%20Copies/")
