@@ -105,19 +105,22 @@ def convert_and_get_metadata(source_file_path, dest_file_path):
     return metadata
 
 
-
+# The transcoder exits after the first transcode. The service continually restarts in Balena, so we need only
+# process the first file. This improves the scope for parallelisation since many transcoders will each just pick
+# up the first unlocked file rather than looping through all files in parallel and potentially coming into
+# conflict.
 def main():
-    # The transcoder exits after the first transcode. The service continually restarts in Balena, so we need only
-    # process the first file. This improves the scope for parallelisation since many transcoders will each just pick
-    # up the first unlocked file rather than looping through all files in parallel and potentially coming into
-    # conflict.
+    # LOOK FOR VIDEO FILES TO CONVERT
     try:
-        logging.info("Looking for video files to convert in %s. Press Ctrl+C (several times) to quit." % settings.WATCH_FOLDER)
+        logging.info("Looking for video files to convert...")
+        logging.info("settings.WATCH_FOLDER: %s." % settings.WATCH_FOLDER)
         files = find_video_files(settings.WATCH_FOLDER)
         source_file_path = next(files)
+        logging.info("source_file_path: %s" % source_file_path)
+        logging.info("Looking for video files to convert... DONE\n")
     except StopIteration:
         # Service is continually started, which is a waste of time/log space if there are no new files.
-        logging.info("No files found. Waiting 1hr.")
+        logging.info("No files found. Waiting 1hr.\n")
         time.sleep(3600)
         return
 
@@ -148,7 +151,7 @@ def main():
 
         logging.info("Making sure we have the destination folders... DONE\n")
     except Exception as e:
-        return post_slack_exception("Leaving alone, something funny with the file name: %s" % e)
+        return post_slack_exception("Could not make sure we have the destination folders. There may be something funny with the file name: %s" % e)
 
 
     # UPDATE XOS WITH STUB VIDEO
@@ -161,7 +164,7 @@ def main():
             'original_file_metadata': json.dumps(master_metadata, default=str)
         })
         logging.info("Stub video django ID: %s" % asset_id)
-        logging.info("Updated XOS with stub video... DONE\n")
+        logging.info("Updating XOS with stub video... DONE\n")
     except Exception as e:
         return post_slack_exception("Couldn't update XOS: %s" % e)
 
@@ -175,7 +178,7 @@ def main():
         web_metadata = convert_and_get_metadata(source_file_path, web_file_path)
         logging.info("Converting to web format... DONE\n")
     except Exception as e:
-        return post_slack_exception("Error converting to access and web formats: %s" % e)
+        return post_slack_exception("Could not convert to access and web formats: %s" % e)
 
 
     # MOVE THE SOURCE FILE INTO THE MASTER FOLDER
