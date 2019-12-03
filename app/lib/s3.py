@@ -19,6 +19,4 @@ def upload_to_s3(path):
     )
 
     basename = os.path.basename(path)
-    logging.info("Uploading to S3: %s", basename)
     client.upload_file(path, S3_BUCKET, S3_LOCATION+'/'+basename)
-    logging.info("Finished uploading to S3: %s", basename)

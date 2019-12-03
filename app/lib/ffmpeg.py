@@ -180,32 +180,14 @@ def find_video_files(source_folder, lock_files=True):
                     yield filepath
 
 
-def write_metadata_summary(metadata_summary, folder):
-    """
-    Write a summary csv file with the metadata collected from every processed video
-    :param metadata_summary: list of metadata dictionaries
-    :param folder: the folder where the csv file will be saved
-    :return: None
-    """
-    if metadata_summary:
-        metadata_file_path = os.path.join(folder, '%s_metadata.csv' % datetime.today().strftime("%Y%m%d"))
-        metadata_file_exists = os.path.isfile(metadata_file_path)
-        with open(metadata_file_path, 'a') as metadata_csv:
-            metadata_csv_writer = csv.DictWriter(metadata_csv, fieldnames=METADATA_CSV_HEADERS)
-            if not metadata_file_exists:
-                metadata_csv_writer.writeheader()
-            for file_metadata in metadata_summary:
-                metadata_csv_writer.writerow(file_metadata)
-
-
-def write_metadata_summary_entry(file_metadata, folder):
+def write_metadata_summary_entry(file_metadata):
     """
     Write an entry in the summary csv file containing metadata from a processed video
     :param file_metadata: the video's metadata
     :param folder: the folder where the csv file is/will be saved
     :return: None
     """
-    metadata_file_path = os.path.join(folder, '%s_metadata.csv' % datetime.today().strftime("%Y%m%d"))
+    metadata_file_path = os.path.join(settings.OUTPUT_FOLDER, '%s_metadata.csv' % datetime.today().strftime("%Y%m%d"))
     metadata_file_exists = os.path.isfile(metadata_file_path)
     with open(metadata_file_path, 'a') as metadata_csv:
         metadata_csv_writer = csv.DictWriter(metadata_csv, fieldnames=METADATA_CSV_HEADERS)

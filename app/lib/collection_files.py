@@ -50,25 +50,7 @@ def parse_collection_folder_path(path):
         raise ValueError("Can't find Vernon ID and title in '%s'." % basename)
 
 
-def get_or_create_collection_folder(filename, parent=None):
-    vernon_id, _, title = parse_collection_file_path(filename)
-
-    # return a folder that starts with vernon_id in parent, if one exists; otherwise create it.
-    if parent:
-        parent = os.path.abspath(os.path.expanduser(parent))
-        for dir in os.listdir(parent):
-            if dir.startswith(vernon_id):
-                return os.path.join(parent, dir)
-
-        # didn't find one; create it.
-        new_path = os.path.join(parent, "%s_%s" % (vernon_id, title))
-        os.makedirs(new_path)
-        return new_path
-    else:
-        return "%s_%s" % (vernon_id, title)
-
-
-def master_to_access_filename(master_path, extension=".mp4"):
+def master_to_access_filename(master_path, extension):
     """
     :param master_path: a master filename, with or without folder
     :param extension: the desired extension of the result.
