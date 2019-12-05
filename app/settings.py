@@ -7,19 +7,35 @@ ACCESS_FOLDER = os.getenv("ACCESS_FOLDER", "/mount/access/")
 WEB_FOLDER = os.getenv("WEB_FOLDER", "/mount/web/")
 OUTPUT_FOLDER = os.getenv("OUTPUT_FOLDER", "/mount/output/")
 
-FFMPEG_DESTINATION_EXT = ".mp4"
-FFMPEG_ARGS = [
+ACCESS_FFMPEG_DESTINATION_EXT = ".mp4"
+ACCESS_FFMPEG_ARGS = [
     '-loglevel', 'panic',
     '-stats',
     '-hide_banner',
     '-pix_fmt', 'yuv420p',  # colour format compatible with quicktime
     '-c:v', 'libx264',
-    '-preset', 'ultrafast',
+    '-preset', 'veryslow',
     # quality of conversion. Try veryslow if lots of time, or ultrafast for testing. Default is 'medium'.
     '-crf', '23',  # compression (implies bitrate): 23 is default, 18 is visually lossless
     '-c:a', 'aac',  # convert audio to aac
     '-n',  # don't overwrite existing files
 ]
+
+WEB_FFMPEG_DESTINATION_EXT = ".mp4"
+WEB_FFMPEG_ARGS = [
+    '-loglevel', 'panic',
+    '-stats',
+    '-hide_banner',
+    '-pix_fmt', 'yuv420p',  # colour format compatible with quicktime
+    '-c:v', 'libx264',
+    '-preset', 'veryslow',
+    # quality of conversion. Try veryslow if lots of time, or ultrafast for testing. Default is 'medium'.
+    '-crf', '28',  # compression (implies bitrate): 23 is default, 18 is visually lossless
+    '-c:a', 'aac',  # convert audio to aac
+    '-n',  # don't overwrite existing files
+]
+
+
 
 TIMEZONE = 'Australia/Victoria'
 

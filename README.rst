@@ -18,7 +18,7 @@ To run without Docker::
    virtualenv venv
    source venv/bin/activate
    pip install -r requirements.txt
-   env `cat dev.env | xargs` app/easyaccess.py
+   env `cat dev.env | grep -v "^#" | xargs` app/easyaccess.py
 
 To install and deploy on Balena
 -------------------------------

@@ -78,7 +78,7 @@ def post_slack_exception(message):
     post_slack_message(message)
 
 
-def convert_and_get_metadata(source_file_path, dest_file_path):
+def convert_and_get_metadata(source_file_path, dest_file_path, ffmpeg_base_args):
     if os.path.exists(dest_file_path):
         message = "Cancelling video conversion: " + dest_file_path + " already exists."
         logging.warning(message)
@@ -87,7 +87,7 @@ def convert_and_get_metadata(source_file_path, dest_file_path):
 
     with tempfile.TemporaryDirectory() as tmp_folder:
         tmp_path = os.path.join(tmp_folder, os.path.basename(dest_file_path))
-        ffmpeg_args = ["ffmpeg", '-i', source_file_path] + settings.FFMPEG_ARGS + [tmp_path]
+        ffmpeg_args = ["ffmpeg", '-i', source_file_path] + ffmpeg_base_args + [tmp_path]
         cmd_str = " ".join(ffmpeg_args)
         logging.info("Running " + cmd_str)
         r = subprocess.run(ffmpeg_args, check=True)
@@ -129,8 +129,8 @@ def main():
     try:
         logging.info("Making sure we have the destination folders...")
         master_filename = os.path.basename(source_file_path)
-        access_filename = master_to_access_filename(master_filename, settings.FFMPEG_DESTINATION_EXT)
-        web_filename = master_to_web_filename(master_filename, settings.FFMPEG_DESTINATION_EXT)
+        access_filename = master_to_access_filename(master_filename, settings.ACCESS_FFMPEG_DESTINATION_EXT)
+        web_filename = master_to_web_filename(master_filename, settings.ACCESS_FFMPEG_DESTINATION_EXT)
 
         vernon_id, file_type, title = parse_collection_file_path(master_filename)
         destination_master_folder = settings.MASTER_FOLDER + vernon_id + '_' + title + '/'
@@ -154,14 +154,25 @@ def main():
         return post_slack_exception("Could not make sure we have the destination folders. There may be something funny with the file name: %s" % e)
 
 
+    # HASH MASTER AND LOG METADATA
+    try:
+        logging.info("Hashing master and logging metadata...")
+        generate_file_md5(source_file_path, store=True)
+        master_metadata = get_video_metadata(source_file_path)
+        master_metadata.update({'vernon_id': vernon_id, 'filetype': file_type, 'title': title})
+        write_metadata_summary_entry(master_metadata)
+        logging.info("Hashing master and logging metadata... DONE\n")
+    except Exception as e:
+        return post_slack_exception("Couldn't hash master and log metadata: %s" % e)
+
+
+
     # UPDATE XOS WITH STUB VIDEO
     try:
         logging.info("Updating XOS with stub video...")
-        generate_file_md5(source_file_path, store=True)
-        master_metadata = get_video_metadata(source_file_path)
         asset_id = update_xos_with_stub_video({
             'title': master_filename+" NOT UPLOADED",
-            'original_file_metadata': json.dumps(master_metadata, default=str)
+            'master_metadata': json.dumps(master_metadata, default=str)
         })
         logging.info("Stub video django ID: %s" % asset_id)
         logging.info("Updating XOS with stub video... DONE\n")
@@ -172,10 +183,10 @@ def main():
     # CONVERT TO ACCESS AND WEB FORMATS
     try:
         logging.info("Converting to access format...")
-        access_metadata = convert_and_get_metadata(source_file_path, access_file_path)
+        access_metadata = convert_and_get_metadata(source_file_path, access_file_path, settings.ACCESS_FFMPEG_ARGS)
         logging.info("Converting to access format... DONE\n")
         logging.info("Converting to web format...")
-        web_metadata = convert_and_get_metadata(source_file_path, web_file_path)
+        web_metadata = convert_and_get_metadata(source_file_path, web_file_path, settings.WEB_FFMPEG_ARGS)
         logging.info("Converting to web format... DONE\n")
     except Exception as e:
         return post_slack_exception("Could not convert to access and web formats: %s" % e)
@@ -187,8 +198,6 @@ def main():
         fixity_move(source_file_path, master_file_path, failsafe_folder=settings.OUTPUT_FOLDER)
         with open(master_file_path + ".json", 'w') as f:
             json.dump(master_metadata, f, indent=2, default=str)
-        master_metadata.update({'vernon_id': vernon_id, 'filetype': file_type, 'title': title})
-        write_metadata_summary_entry(master_metadata)
         new_file_slack_message("*New master file* :movie_camera:", master_file_path, seconds_to_hms(master_metadata['duration_secs']))
         logging.info("Moving the source file into the master folder... DONE\n")
     except Exception as e:
@@ -213,8 +222,8 @@ def main():
         generate_file_md5(master_file_path, store=True)
         update_xos_with_final_video(asset_id, {
             'title': master_filename,
-            'access_file': os.path.basename(access_file_path),
-            'web_file': os.path.basename(web_file_path),
+            'resource': os.path.basename(access_file_path),
+            'web_resource': os.path.basename(web_file_path),
             'access_metadata': json.dumps(access_metadata, default=str),
             'web_metadata': json.dumps(web_metadata, default=str)
         })
