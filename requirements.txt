@@ -1,6 +1,6 @@
 boto3
 ipdb
-python-dateutil
+python-dateutil<2.8.1,>=2.1 # specified by botocore
 pytz
 requests
 slackclient

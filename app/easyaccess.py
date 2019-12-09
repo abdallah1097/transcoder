@@ -166,7 +166,6 @@ def main():
         return post_slack_exception("Couldn't hash master and log metadata: %s" % e)
 
 
-
     # UPDATE XOS WITH STUB VIDEO
     try:
         logging.info("Updating XOS with stub video...")
@@ -232,6 +231,7 @@ def main():
         return post_slack_exception("%s Couldn't update XOS video urls and metadata" % e)
 
     logging.info("=" * 80)
+
 
 if __name__ == "__main__":
     main()
