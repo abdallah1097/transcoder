@@ -11,7 +11,7 @@ COPY requirements.txt /code/app/requirements.txt
 WORKDIR /code/app
 RUN pip install -Ur requirements.txt
 
-RUN mkdir /mount/ /mount/master/ /mount/access /mount/watch /mount/output
+RUN mkdir /mount/ /mount/master/ /mount/access /mount/watch /mount/output /mount/web
 
 COPY . /code/
 

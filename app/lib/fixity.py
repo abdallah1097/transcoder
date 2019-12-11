@@ -1,8 +1,9 @@
 import hashlib
+import logging
 import os
 import shutil
-import logging
 import time
+
 import settings
 
 
@@ -51,7 +52,7 @@ def fixity_copy(source_path, destination_path, store_md5s=True, is_move=False):
     else:
         operation = "copy"
 
-    logging.debug("Fixity %s %s to %s." % (operation, source_path, destination_path))
+    logging.info("Fixity %s %s to %s." % (operation, source_path, destination_path))
     # create md5 for source
     md5_1 = generate_file_md5(source_path, store=store_md5s)
 
@@ -69,12 +70,12 @@ def fixity_copy(source_path, destination_path, store_md5s=True, is_move=False):
         except OSError as oserr:
             retries += 1
             if retries >= settings.MOVE_RETRIES:
-                logging.debug("Too many (%s) retries, gave up trying to fixity %s %s to %s." %
+                logging.warning("Too many (%s) retries, gave up trying to fixity %s %s to %s." %
                               (settings.MOVE_RETRIES, operation, source_path, destination_path))
                 raise oserr
 
-            logging.debug("Error: %s" % oserr)
-            logging.debug("OSError while trying to fixity %s %s to %s. Sleeping to retry later..." %
+            logging.warning("Error: %s" % oserr)
+            logging.warning("OSError while trying to fixity %s %s to %s. Sleeping to retry later..." %
                           (operation, source_path, destination_path))
             time.sleep(settings.RETRY_WAIT)
 
@@ -82,7 +83,7 @@ def fixity_copy(source_path, destination_path, store_md5s=True, is_move=False):
     md5_2 = generate_file_md5(destination_path, store=store_md5s)
 
     if md5_1 == md5_2:
-        logging.debug("Fixity %s complete." % operation)
+        logging.info("Fixity %s complete." % operation)
         return destination_path
     else:
         raise IOError("MD5 of source and destination files don't match.")

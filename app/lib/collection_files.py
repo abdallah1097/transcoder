@@ -50,25 +50,7 @@ def parse_collection_folder_path(path):
         raise ValueError("Can't find Vernon ID and title in '%s'." % basename)
 
 
-def get_or_create_collection_folder(filename, parent=None):
-    vernon_id, _, title = parse_collection_file_path(filename)
-
-    # return a folder that starts with vernon_id in parent, if one exists; otherwise create it.
-    if parent:
-        parent = os.path.abspath(os.path.expanduser(parent))
-        for dir in os.listdir(parent):
-            if dir.startswith(vernon_id):
-                return os.path.join(parent, dir)
-
-        # didn't find one; create it.
-        new_path = os.path.join(parent, "%s_%s" % (vernon_id, title))
-        os.makedirs(new_path)
-        return new_path
-    else:
-        return "%s_%s" % (vernon_id, title)
-
-
-def master_to_access_filename(master_path, extension=".mp4"):
+def master_to_access_filename(master_path, extension):
     """
     :param master_path: a master filename, with or without folder
     :param extension: the desired extension of the result.
@@ -86,21 +68,19 @@ def master_to_access_filename(master_path, extension=".mp4"):
     return "%s_%s%s_%s%s" % (id, 'a', type[1:], title, extension)
 
 
-def abspath(p):
-    return os.path.abspath(os.path.expanduser(p))
+def master_to_web_filename(master_path, extension=".mp4"):
+    """
+    :param master_path: a master filename, with or without folder
+    :param extension: the desired extension of the result.
+    :return: the desired filename of the equivalent web file, without folder name. e.g. "/my/folder/123456_mp01_MyTitle.mov" => "123456_ap01_MyTitle_web.mp4"
+    """
 
+    id, type, title = parse_collection_file_path(master_path)
 
-def file_path_to_url(file_path):
-    full_path = abspath(file_path)
-    commonpath = os.path.commonpath([full_path, settings.MASTER_FOLDER])
-    if os.path.samefile(commonpath, settings.MASTER_FOLDER):
-        url_root = settings.MASTER_URL
-    else:
-        commonpath = os.path.commonpath([full_path, settings.ACCESS_FOLDER])
-        if os.path.samefile(commonpath, settings.ACCESS_FOLDER):
-            url_root = settings.ACCESS_URL
-        else:
-            raise ValueError("%s doesn't seem to be in either the Master or Access folders. Not sure how to make a URL for this." % file_path)
+    type_char = type[0]
+    try:
+        assert type_char == "m"
+    except AssertionError:
+        raise ValueError("%s is not named like a master file." % master_path)
 
-    diffpath = full_path[len(commonpath):].lstrip(posixpath.sep)
-    return posixpath.join(url_root, diffpath)
+    return "%s_%s%s_%s_web%s" % (id, 'a', type[1:], title, extension)
