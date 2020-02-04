@@ -123,7 +123,7 @@ def get_video_metadata(video_location):
 
     return {
         'mime_type': VIDEO_MIME_TYPES.get(ext, None),
-        'creation_datetime': creation_datetime,
+        'creation_datetime': str(creation_datetime),
         'file_size_bytes': file_metadata['file_size_bytes'],
 
         'duration_secs': float(m['format'].get('duration', 0.0)),
