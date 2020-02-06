@@ -32,7 +32,7 @@ from lib.fixity import fixity_move, generate_file_md5, post_move_filename
 from lib.formatting import seconds_to_hms
 from lib.s3 import upload_to_s3
 from lib.slack import post_slack_message
-from lib.xos import update_xos_with_final_video, update_xos_with_stub_video
+from lib.xos import update_xos_with_final_video, get_or_create_xos_stub_video
 
 logging.basicConfig(format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
@@ -168,13 +168,13 @@ def main():
 
     # UPDATE XOS WITH STUB VIDEO
     try:
-        logging.info("Updating XOS with stub video...")
-        asset_id = update_xos_with_stub_video({
+        logging.info("Getting or creating XOS stub video...")
+        asset_id = get_or_create_xos_stub_video({
             'title': master_filename+" NOT UPLOADED",
-            'master_metadata': json.dumps(master_metadata, default=str)
+            'master_metadata': master_metadata
         })
         logging.info("Stub video django ID: %s" % asset_id)
-        logging.info("Updating XOS with stub video... DONE\n")
+        logging.info("Getting or creating XOS stub video... DONE\n")
     except Exception as e:
         return post_slack_exception("Couldn't update XOS: %s" % e)
 
