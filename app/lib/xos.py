@@ -6,6 +6,10 @@ XOS_AUTH_TOKEN = os.environ['XOS_AUTH_TOKEN']
 XOS_API_ENDPOINT = os.environ['XOS_API_ENDPOINT']
 
 def get_or_create_xos_stub_video(video_data):
+    """
+    Creates and returns the ID of a stub video with keys and values from video_data.
+    If one already exists due to a previously failed transcoding, just returns its ID.
+    """
     xos_video_endpoint = f'{XOS_API_ENDPOINT}assets/'
     headers = {'Authorization': 'Token ' + XOS_AUTH_TOKEN}
 
@@ -20,6 +24,9 @@ def get_or_create_xos_stub_video(video_data):
     return response.json()['id']
 
 def update_xos_with_final_video(asset_id, video_data):
+    """
+    Update the specified asset with keys and values from video_data
+    """
     xos_video_endpoint = f'{XOS_API_ENDPOINT}assets/{asset_id}/'
     headers = {'Authorization': 'Token ' + XOS_AUTH_TOKEN}
     response = requests.patch(xos_video_endpoint, json=video_data, headers=headers)
