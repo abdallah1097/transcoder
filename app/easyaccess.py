@@ -63,10 +63,6 @@ def convert_and_get_metadata(source_file_path, dest_file_path, ffmpeg_base_args,
     return metadata
 
 
-# The transcoder exits after the first transcode. The service continually restarts in Balena, so we need only
-# process the first file. This improves the scope for parallelisation since many transcoders will each just pick
-# up the first unlocked file rather than looping through all files in parallel and potentially coming into
-# conflict.
 def main():
     # LOOK FOR VIDEO FILES TO CONVERT
     try:
@@ -207,4 +203,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
