@@ -161,7 +161,7 @@ def lock(filepath):
 def unlock(filepath):
     os.remove(_lockfile(filepath))
 
-def find_video_files(source_folder, lock_files=True):
+def find_video_file(source_folder, lock_files=True):
     # generate all the video paths in the source folder
     source_folder = os.path.abspath(os.path.expanduser(source_folder))
     for dirpath, dirnames, filenames in os.walk(source_folder, followlinks=True):
@@ -174,10 +174,9 @@ def find_video_files(source_folder, lock_files=True):
                 if lock_files:
                     if not is_locked(filepath):
                         lock(filepath)
-                        yield filepath
-                        unlock(filepath)
+                        return filepath
                 else:
-                    yield filepath
+                    return filepath
 
 
 def write_metadata_summary_entry(file_metadata):

@@ -13,12 +13,11 @@ The Transcoder is shipped as a Docker image. It needs to be run with special per
    cp dev.tmpl.env dev.env # now edit the values in dev.env
    docker-compose -f docker-compose-dev.yml up --build
 
-To run without Docker::
-
-   virtualenv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   env `cat dev.env | grep -v "^#" | xargs` app/easyaccess.py
+To speed up ffmpeg, change app/settings.py ACCESS_FFMPEG_ARGS and WEB_FFMPEG_ARGS: '-preset', 'ultrafast'
+To run without slack, put a return statement at the top of post_slack_message (app/lib/slack.py)
+To use a local folder as the mount, change docker-compose-dev.yml:
+   volumes:
+      - /home/johnsmith/transcoder_dev_mount:/mount
 
 To install and deploy on Balena
 -------------------------------
