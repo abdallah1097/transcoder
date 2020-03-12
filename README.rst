@@ -82,6 +82,6 @@ To install and deploy on OSX
 2. Clone this repo into the home directory ~/
 3. cp ~/transcoder/dev.tmpl.env ~/transcoder/dev.env and update the env vars for SMB, Slack, S3, XOS etc.
 4. Open System Preferences > Users & Groups > + > choose osx_start_transcoder_on_boot.command
+4. Open System Preferences > Users & Groups > Login Options > choose Automatic login: your user
 5. Reboot
 6. cat ~/transcoder_log.txt
-
