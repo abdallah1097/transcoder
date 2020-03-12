@@ -74,3 +74,14 @@ Later:
 - Show file size, processing time, in Slack
 - during a fixity copy: if destination exists, do md5 and no-op if OK.
 - Add dry-run param.
+
+To install and deploy on OSX
+----------------------------
+
+1. Install Docker
+2. Clone this repo into the home directory ~/
+3. cp ~/transcoder/dev.tmpl.env ~/transcoder/dev.env and update the env vars for SMB, Slack, S3, XOS etc.
+4. Open System Preferences > Users & Groups > + > choose osx_start_transcoder_on_boot.command
+5. Reboot
+6. cat ~/transcoder_log.txt
+
