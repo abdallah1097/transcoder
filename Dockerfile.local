@@ -5,6 +5,7 @@ FROM python:3
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends ffmpeg cifs-utils
 ENV PYTHONUNBUFFERED 1
+ENV TZ=Australia/Melbourne
 
 # copying requirements separately means they are only installed when the file changes
 COPY requirements.txt /code/app/requirements.txt
