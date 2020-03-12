@@ -65,17 +65,15 @@ def convert_and_get_metadata(source_file_path, dest_file_path, ffmpeg_base_args,
 
 def main():
     # LOOK FOR VIDEO FILES TO CONVERT
-    try:
-        logging.info("Looking for video files to convert...")
-        logging.info("settings.WATCH_FOLDER: %s." % settings.WATCH_FOLDER)
-        source_file_path = find_video_file(settings.WATCH_FOLDER)
-        logging.info("source_file_path: %s" % source_file_path)
-        logging.info("Looking for video files to convert... DONE\n")
-    except StopIteration:
-        # Service is continually started, which is a waste of time/log space if there are no new files.
+    logging.info("Looking for video files to convert...")
+    logging.info("settings.WATCH_FOLDER: %s." % settings.WATCH_FOLDER)
+    source_file_path = find_video_file(settings.WATCH_FOLDER)
+    if not source_file_path:
         logging.info("No files found. Waiting 1hr.\n")
         time.sleep(3600)
         return
+    logging.info("source_file_path: %s" % source_file_path)
+    logging.info("Looking for video files to convert... DONE\n")
 
 
     # MAKE SURE WE HAVE THE DESTINATION FOLDERS
