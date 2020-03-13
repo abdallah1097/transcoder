@@ -19,6 +19,7 @@ import os
 import posixpath
 import re
 import time
+import shutil
 from datetime import date
 
 import settings
@@ -176,6 +177,7 @@ def main():
         logging.info("Uploading access file to S3... DONE\n")
         logging.info("Uploading web file to S3...")
         upload_to_s3(web_file_path)
+        shutil.rmtree(destination_web_folder)
         logging.info("Uploading web file to S3... DONE\n")
     except Exception as e:
         return post_slack_exception("%s Couldn't upload to S3" % e)

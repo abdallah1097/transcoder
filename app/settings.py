@@ -4,7 +4,7 @@ import os
 WATCH_FOLDER = "/mount/watch/"
 MASTER_FOLDER =  "/mount/master/"
 ACCESS_FOLDER = "/mount/access/"
-WEB_FOLDER = "/mount/web/"
+WEB_FOLDER = "/tmp/"
 OUTPUT_FOLDER = "/mount/output/"
 
 ACCESS_FFMPEG_DESTINATION_EXT = ".mp4"
