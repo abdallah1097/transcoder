@@ -73,5 +73,4 @@ def new_file_slack_message(message, file_path, duration):
 
 def post_slack_exception(message):
     traceback.print_exc()
-    logging.warning(message)
     post_slack_message(message)
