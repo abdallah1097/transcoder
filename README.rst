@@ -13,12 +13,11 @@ The Transcoder is shipped as a Docker image. It needs to be run with special per
    cp dev.tmpl.env dev.env # now edit the values in dev.env
    docker-compose -f docker-compose-dev.yml up --build
 
-To run without Docker::
-
-   virtualenv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   env `cat dev.env | grep -v "^#" | xargs` app/easyaccess.py
+To speed up ffmpeg, change app/settings.py ACCESS_FFMPEG_ARGS and WEB_FFMPEG_ARGS: '-preset', 'ultrafast'
+To run without slack, put a return statement at the top of post_slack_message (app/lib/slack.py)
+To use a local folder as the mount, change docker-compose-dev.yml:
+   volumes:
+      - /home/johnsmith/transcoder_dev_mount:/mount
 
 To install and deploy on Balena
 -------------------------------
@@ -75,3 +74,14 @@ Later:
 - Show file size, processing time, in Slack
 - during a fixity copy: if destination exists, do md5 and no-op if OK.
 - Add dry-run param.
+
+To install and deploy on OSX
+----------------------------
+
+1. Install Docker
+2. Clone this repo into the home directory ~/
+3. cp ~/transcoder/dev.tmpl.env ~/transcoder/dev.env and update the env vars for SMB, Slack, S3, XOS etc.
+4. Open System Preferences > Users & Groups > + > choose osx_start_transcoder_on_boot.command
+4. Open System Preferences > Users & Groups > Login Options > choose Automatic login: your user
+5. Reboot
+6. cat ~/transcoder_log.txt
