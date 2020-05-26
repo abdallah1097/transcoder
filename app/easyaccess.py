@@ -106,7 +106,8 @@ def main():
 
         if not os.path.exists(destination_master_folder): os.mkdir(destination_master_folder)
         if not os.path.exists(destination_access_folder): os.mkdir(destination_access_folder)
-        if not os.path.exists(destination_web_folder): os.mkdir(destination_web_folder)
+        if settings.TRANSCODE_WEB_COPY:
+            if not os.path.exists(destination_web_folder): os.mkdir(destination_web_folder)
 
         master_file_path = destination_master_folder + master_filename
         access_file_path = destination_access_folder + access_filename
@@ -114,7 +115,8 @@ def main():
 
         logging.info("master_file_path: %s" % master_file_path)
         logging.info("access_file_path: %s" % access_file_path)
-        logging.info("web_file_path: %s" % web_file_path)
+        if settings.TRANSCODE_WEB_COPY:
+            logging.info("web_file_path: %s" % web_file_path)
 
         logging.info("Making sure we have the destination folders... DONE\n")
     except Exception as e:
@@ -151,9 +153,10 @@ def main():
         logging.info("Converting to access format...")
         access_metadata = convert_and_get_metadata(source_file_path, access_file_path, settings.ACCESS_FFMPEG_ARGS, vernon_id, access_file_type, title)
         logging.info("Converting to access format... DONE\n")
-        logging.info("Converting to web format...")
-        web_metadata = convert_and_get_metadata(source_file_path, web_file_path, settings.WEB_FFMPEG_ARGS, vernon_id, web_file_type, title)
-        logging.info("Converting to web format... DONE\n")
+        if settings.TRANSCODE_WEB_COPY:
+            logging.info("Converting to web format...")
+            web_metadata = convert_and_get_metadata(source_file_path, web_file_path, settings.WEB_FFMPEG_ARGS, vernon_id, web_file_type, title)
+            logging.info("Converting to web format... DONE\n")
     except Exception as e:
         return post_slack_exception("Could not convert to access and web formats: %s" % e)
 
@@ -175,10 +178,11 @@ def main():
         logging.info("Uploading access file to S3...")
         upload_to_s3(access_file_path)
         logging.info("Uploading access file to S3... DONE\n")
-        logging.info("Uploading web file to S3...")
-        upload_to_s3(web_file_path)
-        shutil.rmtree(destination_web_folder)
-        logging.info("Uploading web file to S3... DONE\n")
+        if settings.TRANSCODE_WEB_COPY:
+            logging.info("Uploading web file to S3...")
+            upload_to_s3(web_file_path)
+            shutil.rmtree(destination_web_folder)
+            logging.info("Uploading web file to S3... DONE\n")
     except Exception as e:
         return post_slack_exception("%s Couldn't upload to S3" % e)
 
@@ -187,13 +191,17 @@ def main():
     try:
         logging.info("Updating XOS video urls and metadata...")
         generate_file_md5(master_file_path, store=True)
-        update_xos_with_final_video(asset_id, {
+        xos_asset_data = {
             'title': master_filename,
             'resource': os.path.basename(access_file_path),
-            'web_resource': os.path.basename(web_file_path),
             'access_metadata': json.dumps(access_metadata, default=str),
-            'web_metadata': json.dumps(web_metadata, default=str)
-        })
+        }
+        if settings.TRANSCODE_WEB_COPY:
+            xos_asset_data.update({
+                'web_resource': os.path.basename(web_file_path),
+                'web_metadata': json.dumps(web_metadata, default=str)
+            })
+        update_xos_with_final_video(asset_id, xos_asset_data)
         logging.info("Updating XOS video urls and metadata... DONE\n")
     except Exception as e:
         return post_slack_exception("%s Couldn't update XOS video urls and metadata" % e)
