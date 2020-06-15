@@ -47,4 +47,4 @@ MASTER_URL = "smb:" + os.getenv('SMB_MASTER', "//fsqcollnas.corp.acmi.net.au/Pre
 ACCESS_URL = "smb:" + os.getenv('SMB_ACCESS', "//fsqcollnas.corp.acmi.net.au/Access%20Copies/")
 WEB_URL = "smb:" + os.getenv('SMB_WEB', "//fsqcollnas.corp.acmi.net.au/Web%20Copies/")
 
-TRANSCODE_WEB_COPY = os.getenv('TRANSCODE_WEB_COPY', 'True') == 'True'
+TRANSCODE_WEB_COPY = os.getenv('TRANSCODE_WEB_COPY', 'False') == 'True'
