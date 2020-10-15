@@ -1,5 +1,6 @@
 import unittest
 
+from lib.ffmpeg import restricted_file
 from lib.formatting import seconds_to_hms
 
 
@@ -37,6 +38,12 @@ class TestFormatting(unittest.TestCase):
 
     def test_frames_rounding_2(self):
         self.assertEqual(seconds_to_hms(65.99, output_frames=True), '01:06:00')
+
+
+class TestFileHandling(unittest.TestCase):
+
+    def test_restricted_file(self):
+        self.assertTrue(restricted_file('B2004203_mo01_RESTRICTED_CyberthonIV.mov'))
 
 
 if __name__ == '__main__':
