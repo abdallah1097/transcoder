@@ -11,7 +11,21 @@ To run on development
 The Transcoder is shipped as a Docker image. It needs to be run with special permissions to mount the volumes. (The mounting happens in ``docker-entrypoint.sh``). To run, call the following::
 
    cp dev.tmpl.env dev.env # now edit the values in dev.env
-   docker-compose -f docker-compose-dev.yml up --build
+   make build
+
+To run without building
+
+   make up
+
+To run tests
+
+   make up
+   docker exec -it transcoder_transcoder_1 make test
+
+To run linting
+
+   make up
+   docker exec -it transcoder_transcoder_1 make lint
 
 To speed up ffmpeg, change app/settings.py ACCESS_FFMPEG_ARGS and WEB_FFMPEG_ARGS: '-preset', 'ultrafast'
 To run without slack, put a return statement at the top of post_slack_message (app/lib/slack.py)
