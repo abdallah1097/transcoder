@@ -10,19 +10,21 @@ def post_slack_message(message, channel=None, **kwargs):
 
     slack_token = os.getenv("SLACK_TOKEN")
 
-    sc = slack.WebClient(token=slack_token)
+    slack_client = slack.WebClient(token=slack_token)
 
-    r = sc.chat_postMessage(
-        channel=channel,
-        text=message,
-        as_user=True,
-        **kwargs, #e.g. attachments
-    )
+    response = None
+    try:
+        response = slack_client.chat_postMessage(
+            channel=channel,
+            text=message,
+            as_user=True,
+            **kwargs, #e.g. attachments
+        )
+    except slack.errors.SlackApiError as exception:
+        response = exception
+        logging.error(f'Error posting to Slack channel {channel}: {exception}')
 
-    # if 'error' in r:
-    #     raise slack.errors.SlackClientError("%s: %s" % (r['error'], channel))
-
-    return r
+    return response
 
 
 def slack_link(url, text=""):
