@@ -183,7 +183,8 @@ def find_video_file(source_folder, lock_files=True):
                 # make sure the file still exists, in case another thread is running and deleted it
                 if not os.path.exists(filepath):
                     continue
-                if not restricted_file(filepath):
+                if restricted_file(filepath):
+                    lock(filepath)
                     continue
                 if lock_files:
                     if not is_locked(filepath):

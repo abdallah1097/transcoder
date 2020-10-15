@@ -1,6 +1,6 @@
 import unittest
 
-from lib.ffmpeg import restricted_file
+from lib.ffmpeg import find_video_file, restricted_file
 from lib.formatting import seconds_to_hms
 
 
@@ -44,6 +44,9 @@ class TestFileHandling(unittest.TestCase):
 
     def test_restricted_file(self):
         self.assertTrue(restricted_file('B2004203_mo01_RESTRICTED_CyberthonIV.mov'))
+
+    def test_find_video_file(self):
+        self.assertFalse(find_video_file('/code/app/test_data'))
 
 
 if __name__ == '__main__':
