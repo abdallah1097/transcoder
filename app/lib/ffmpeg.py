@@ -161,6 +161,18 @@ def lock(filepath):
 def unlock(filepath):
     os.remove(_lockfile(filepath))
 
+def restricted_file(filepath):
+    """
+    Prevent files marked RESTRICTED from being transcoded.
+    These files are named with ACMIId_fourdigitcode_RESTRICTED_title.
+    """
+    restricted = False
+    if '_RESTRICTED_' in filepath:
+        restricted = True
+        logging.info(f'Ignoring restricted file: {filepath}')
+    return restricted
+
+
 def find_video_file(source_folder, lock_files=True):
     # generate all the video paths in the source folder
     source_folder = os.path.abspath(os.path.expanduser(source_folder))
@@ -170,6 +182,9 @@ def find_video_file(source_folder, lock_files=True):
                 filepath = os.path.join(dirpath, file)
                 # make sure the file still exists, in case another thread is running and deleted it
                 if not os.path.exists(filepath):
+                    continue
+                if restricted_file(filepath):
+                    lock(filepath)
                     continue
                 if lock_files:
                     if not is_locked(filepath):
