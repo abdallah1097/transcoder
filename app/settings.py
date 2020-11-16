@@ -35,6 +35,46 @@ WEB_FFMPEG_ARGS = [
     '-n',  # don't overwrite existing files
 ]
 
+EXHIBITIONS_ACCESS_FFMPEG_ARGS = [
+    '-loglevel', 'panic',
+    '-stats',
+    '-hide_banner',
+    '-pix_fmt', 'yuv420p',  # colour format compatible with quicktime
+    '-c:v', 'libx264',
+    '-b:v', os.getenv('EXHIBITIONS_BITRATE', '20000k'),  # video bitrate
+    '-minrate', os.getenv('EXHIBITIONS_BITRATE', '20000k'),
+    '-maxrate', os.getenv('EXHIBITIONS_BITRATE', '20000k'),
+    '-bufsize', os.getenv('EXHIBITIONS_BITRATE', '20000k'),
+    '-vf', f'scale={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:force_original_aspect_ratio=decrease,'
+           f'pad={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:-1:-1:color=black',  # output video size
+    '-r', os.getenv('EXHIBITIONS_FRAMERATE', '25'),  # output video framerate
+    '-preset', 'veryslow',  # quality of conversion.
+    '-c:a', 'aac',  # convert audio to aac
+    '-ab', '320k',  # audio bitrate
+    '-ac', '2',  # audio number of channels
+    '-ar', '48000',  # audio sample rate
+    '-n',  # don't overwrite existing files
+]
+
+EXHIBITIONS_WEB_FFMPEG_ARGS = [
+    '-loglevel', 'panic',
+    '-stats',
+    '-hide_banner',
+    '-pix_fmt', 'yuv420p',  # colour format compatible with quicktime
+    '-c:v', 'libx264',
+    '-vf', f'scale={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:force_original_aspect_ratio=decrease,'
+           f'pad={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:-1:-1:color=black',  # output video size
+    '-r', os.getenv('EXHIBITIONS_FRAMERATE', '25'),  # output video framerate
+    '-preset', 'veryslow',
+    # quality of conversion. Try veryslow if lots of time, or ultrafast for testing. Default is 'medium'.
+    '-crf', '28',  # compression (implies bitrate): 23 is default, 18 is visually lossless
+    '-c:a', 'aac',  # convert audio to aac
+    '-ab', '320k',  # audio bitrate
+    '-ac', '2',  # audio number of channels
+    '-ar', '48000',  # audio sample rate
+    '-n',  # don't overwrite existing files
+]
+
 
 
 TIMEZONE = 'Australia/Victoria'
@@ -48,3 +88,5 @@ ACCESS_URL = "smb:" + os.getenv('SMB_ACCESS', "//fsqcollnas.corp.acmi.net.au/Acc
 WEB_URL = "smb:" + os.getenv('SMB_WEB', "//fsqcollnas.corp.acmi.net.au/Web%20Copies/")
 
 TRANSCODE_WEB_COPY = os.getenv('TRANSCODE_WEB_COPY', 'False') == 'True'
+
+EXHIBITIONS_TRANSCODER = os.getenv('EXHIBITIONS_TRANSCODER', 'False') == 'True'
