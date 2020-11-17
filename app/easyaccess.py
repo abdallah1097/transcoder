@@ -13,6 +13,7 @@ For every compatible video file in the watch folder (assume it is a master file)
 
 import json
 import logging
+from os import access
 import tempfile
 import subprocess
 import os
@@ -62,6 +63,86 @@ def convert_and_get_metadata(source_file_path, dest_file_path, ffmpeg_base_args,
     new_file_slack_message("*New file* :hatching_chick:", dest_file_path, seconds_to_hms(metadata['duration_secs']))
 
     return metadata
+
+
+def convert_to_exhibition_formats(
+        source_file_path,
+        access_file_path,
+        access_file_type,
+        web_file_path,
+        web_file_type,
+        vernon_id,
+        title,
+    ):
+    access_metadata = None
+    web_metadata = None
+    try:
+        logging.info('Converting to exhibitions access format...')
+        access_metadata = convert_and_get_metadata(
+            source_file_path,
+            access_file_path,
+            settings.EXHIBITIONS_ACCESS_FFMPEG_ARGS,
+            vernon_id,
+            access_file_type,
+            title,
+        )
+        logging.info('Converting to exhibitions access format... DONE\n')
+        if settings.TRANSCODE_WEB_COPY:
+            logging.info('Converting to exhibitions web format...')
+            web_metadata = convert_and_get_metadata(
+                source_file_path,
+                web_file_path,
+                settings.EXHIBITIONS_WEB_FFMPEG_ARGS,
+                vernon_id,
+                web_file_type,
+                title,
+            )
+            logging.info('Converting to exhibitions web format... DONE\n')
+    except Exception as exception:
+        return post_slack_exception(
+            'Could not convert to exhibitions access and web formats: %s' % exception
+        )
+    return access_metadata, web_metadata
+
+
+def convert_to_collection_formats(
+        source_file_path,
+        access_file_path,
+        access_file_type,
+        web_file_path,
+        web_file_type,
+        vernon_id,
+        title,
+    ):
+    access_metadata = None
+    web_metadata = None
+    try:
+        logging.info('Converting to collections access format...')
+        access_metadata = convert_and_get_metadata(
+            source_file_path,
+            access_file_path,
+            settings.ACCESS_FFMPEG_ARGS,
+            vernon_id,
+            access_file_type,
+            title,
+        )
+        logging.info('Converting to collections access format... DONE\n')
+        if settings.TRANSCODE_WEB_COPY:
+            logging.info('Converting to collections web format...')
+            web_metadata = convert_and_get_metadata(
+                source_file_path,
+                web_file_path,
+                settings.WEB_FFMPEG_ARGS,
+                vernon_id,
+                web_file_type,
+                title,
+            )
+            logging.info('Converting to collections web format... DONE\n')
+    except Exception as exception:
+        return post_slack_exception(
+            'Could not convert to collections access and web formats: %s' % exception
+        )
+    return access_metadata, web_metadata
 
 
 def main():
@@ -149,55 +230,28 @@ def main():
 
 
     # CONVERT TO ACCESS AND WEB FORMATS
-    try:
-        if settings.EXHIBITIONS_TRANSCODER:
-            # Transcoder settings for in-gallery exhibitions videos
-            logging.info('Converting to exhibitions access format...')
-            access_metadata = convert_and_get_metadata(
-                source_file_path,
-                access_file_path,
-                settings.EXHIBITIONS_ACCESS_FFMPEG_ARGS,
-                vernon_id,
-                access_file_type,
-                title,
-            )
-            logging.info('Converting to access format... DONE\n')
-            if settings.TRANSCODE_WEB_COPY:
-                logging.info('Converting to web format...')
-                web_metadata = convert_and_get_metadata(
-                    source_file_path,
-                    web_file_path,
-                    settings.EXHIBITIONS_WEB_FFMPEG_ARGS,
-                    vernon_id,
-                    web_file_type,
-                    title,
-                )
-                logging.info('Converting to web format... DONE\n')
-        else:
-            # Transcoder settings for collections videos
-            logging.info('Converting to access format...')
-            access_metadata = convert_and_get_metadata(
-                source_file_path,
-                access_file_path,
-                settings.ACCESS_FFMPEG_ARGS,
-                vernon_id,
-                access_file_type,
-                title,
-            )
-            logging.info('Converting to access format... DONE\n')
-            if settings.TRANSCODE_WEB_COPY:
-                logging.info('Converting to web format...')
-                web_metadata = convert_and_get_metadata(
-                    source_file_path,
-                    web_file_path,
-                    settings.WEB_FFMPEG_ARGS,
-                    vernon_id,
-                    web_file_type,
-                    title,
-                )
-                logging.info('Converting to web format... DONE\n')
-    except Exception as e:
-        return post_slack_exception('Could not convert to access and web formats: %s' % e)
+    if settings.EXHIBITIONS_TRANSCODER:
+        # Transcoder settings for in-gallery exhibitions videos
+        access_metadata, web_metadata = convert_to_exhibition_formats(
+            source_file_path,
+            access_file_path,
+            access_file_type,
+            web_file_path,
+            web_file_type,
+            vernon_id,
+            title,
+        )
+    else:
+        # Transcoder settings for collections videos
+        access_metadata, web_metadata = convert_to_collection_formats(
+            source_file_path,
+            access_file_path,
+            access_file_type,
+            web_file_path,
+            web_file_type,
+            vernon_id,
+            title,
+        )
 
 
     # MOVE THE SOURCE FILE INTO THE MASTER FOLDER

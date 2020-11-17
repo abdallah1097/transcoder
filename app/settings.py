@@ -2,7 +2,7 @@ import os
 
 # These paths are mounted into the docker container by docker-entrypoint.sh
 WATCH_FOLDER = "/mount/watch/"
-MASTER_FOLDER =  "/mount/master/"
+MASTER_FOLDER = "/mount/master/"
 ACCESS_FOLDER = "/mount/access/"
 WEB_FOLDER = "/tmp/"
 OUTPUT_FOLDER = "/mount/output/"

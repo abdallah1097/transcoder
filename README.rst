@@ -12,9 +12,9 @@ To transcode exhibitions videos for use in-gallery at ACMI, set the flag `EXHIBI
 
 Optional flags to control the output are::
 
-   EXHIBITIONS_VIDEO_SIZE="1920:1080"
-   EXHIBITIONS_FRAMERATE=25
-   EXHIBITIONS_BITRATE=20000k
+   EXHIBITIONS_VIDEO_SIZE="1920:1080"  # width:height
+   EXHIBITIONS_FRAMERATE=25  # Frames per second
+   EXHIBITIONS_BITRATE=20000k  # kbit/s
 
 To run on development
 ---------------------
