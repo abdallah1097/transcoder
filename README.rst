@@ -3,7 +3,18 @@ Transcoder
 
 The Collections transcoder mounts network folders and watches for "Master" files, then converts them to a specified "Access" format, then safely (using fixity checks) moves both files into final locations.
 
-The "Access" format is a simple ACMI specification that converts to h.264 and preserves resolution and framerate. This specification can be changed or overridden in ``settings.FFMPEG_ARGS``.
+The "Access" format is a simple ACMI specification that converts to h.264 and preserves resolution and framerate. This specification can be changed or overridden in ``settings.ACCESS_FFMPEG_ARGS``.
+
+For Exhibitions videos
+----------------------
+
+To transcode exhibitions videos for use in-gallery at ACMI, set the flag `EXHIBITIONS_TRANSCODER` to `True`.
+
+Optional flags to control the output are::
+
+   EXHIBITIONS_VIDEO_SIZE="1920:1080"  # width:height
+   EXHIBITIONS_FRAMERATE=25  # Frames per second
+   EXHIBITIONS_BITRATE=20000k  # kbit/s
 
 To run on development
 ---------------------
@@ -13,16 +24,16 @@ The Transcoder is shipped as a Docker image. It needs to be run with special per
    cp dev.tmpl.env dev.env # now edit the values in dev.env
    make build
 
-To run without building
+To run without building::
 
    make up
 
-To run tests
+To run tests::
 
    make up
    docker exec -it transcoder_transcoder_1 make test
 
-To run linting
+To run linting::
 
    make up
    docker exec -it transcoder_transcoder_1 make lint
