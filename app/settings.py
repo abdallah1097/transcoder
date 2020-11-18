@@ -45,6 +45,7 @@ EXHIBITIONS_ACCESS_FFMPEG_ARGS = [
     '-minrate', os.getenv('EXHIBITIONS_BITRATE', '20000k'),
     '-maxrate', os.getenv('EXHIBITIONS_BITRATE', '20000k'),
     '-bufsize', os.getenv('EXHIBITIONS_BITRATE', '20000k'),
+    '-nal-hrd', 'cbr',  # ensure h264 uses a constant bitrate for encoding
     '-vf', f'scale={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:force_original_aspect_ratio=decrease,'
            f'pad={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:-1:-1:color=black',  # output video size
     '-r', os.getenv('EXHIBITIONS_FRAMERATE', '25'),  # output video framerate
