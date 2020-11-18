@@ -48,7 +48,6 @@ EXHIBITIONS_ACCESS_FFMPEG_ARGS = [
     '-vf', f'scale={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:force_original_aspect_ratio=decrease,'
            f'pad={os.getenv("EXHIBITIONS_VIDEO_SIZE", "1920:1080")}:-1:-1:color=black',  # output video size
     '-r', os.getenv('EXHIBITIONS_FRAMERATE', '25'),  # output video framerate
-    '-preset', 'veryslow',  # quality of conversion.
     '-c:a', 'aac',  # convert audio to aac
     '-ab', '320k',  # audio bitrate
     '-ac', '2',  # audio number of channels
