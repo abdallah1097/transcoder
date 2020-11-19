@@ -8,5 +8,6 @@ services:
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
-    volumes:
-      - /Users/sloffler/Code/transcoder-test-folders:/mount
+# Local storage volumes to mount for development on macOS
+#    volumes:
+#      - /Users/sloffler/Code/transcoder-test-folders:/mount
